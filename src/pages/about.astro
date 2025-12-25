@@ -1,5 +1,5 @@
 ---
-import '../styles/global.css';
+import BaseLayout from '../layouts/BaseLayout.astro';
 
 const pageTitle = "私について";
 const identity = {
@@ -19,30 +19,7 @@ const fontWeight = "bold";
 const textCase = "uppercase";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-    <title>{pageTitle}</title>
-        <style define:vars={{skillColor}}>
-      h1 {
-        color: purple;
-        font-size: 4rem;
-      }
-  .skill {
-    color: var(--skillColor);
-    font-weight: var(--fontWeight);
-    text-transform: var(--textCase);
-  }
-    </style>
-	</head>
-<body>
-    <a href="/">ホーム</a>
-<a href="/about/">概要</a>
-<a href="/blog/">ブログ</a>
-    <h1>{pageTitle}</h1>
+<BaseLayout pageTitle={pageTitle}>
   <h2>... そして私の新しいAstroサイトについて！</h2>
 
   <p>私はAstroの入門チュートリアルを進めています。これは私のウェブサイトの2番目のページで、自分で作った初めてのページです！</p>
@@ -65,5 +42,4 @@ const textCase = "uppercase";
 
 {goal === 3 ? <p>My goal is to finish in 3 days. 3日で終えるのが目標です。</p> : <p>My goal is not 3 days. 3日が目標ではありません。</p>}
 </ul>
-</body>
-</html>
+</BaseLayout>
