@@ -62,7 +62,7 @@ heroAlt: "メガミデバイス B1R-M シャーシキット（コトブキヤ）
 
 <figure>
   <img src="/images/blog/2026-01-23/photo-02.avif" alt="シャーシキットA/B" />
-  <figcaption>シャーシキット2人</figcaption>
+  <figcaption>軽いから大丈夫（自己責任</figcaption>
 </figure>
 
 いい感じに近未来になります笑  
