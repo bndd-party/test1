@@ -15,6 +15,15 @@ const { pageTitle, description } = Astro.props;
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
 
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q43P8R4LVX"></script>
+          <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-Q43P8R4LVX');
+    </script>
+
     <title>{pageTitle}</title>
     {description && <meta name="description" content={description} />}
   </head>
