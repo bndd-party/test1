@@ -1,0 +1,198 @@
+---
+// Lightbox.astro
+// 記事内の img をまとめてライトボックス化
+// data-lightbox="off" を付けたimgは除外可
+---
+
+<script is:inline>
+  (() => {
+    const ready = () => {
+      const images = Array.from(document.querySelectorAll("article img"))
+        .filter((img) => !img.closest("a"))              // 既にリンクなら二重にしない
+        .filter((img) => img.dataset.lightbox !== "off") // 明示的に除外できる
+        .filter((img) => img.getAttribute("src"));       // srcあるものだけ
+
+      if (images.length === 0) return;
+
+      // overlay 作成（1個だけ）
+      const overlay = document.createElement("div");
+      overlay.className = "kc-lightbox";
+      overlay.innerHTML = `
+        <div class="kc-lightbox__backdrop"></div>
+
+        <button class="kc-lightbox__close" aria-label="Close">
+         <span aria-hidden="true">×</span>
+        </button>
+
+        <figure class="kc-lightbox__figure" role="dialog" aria-modal="true">
+         <img class="kc-lightbox__img" alt="" />
+            <figcaption class="kc-lightbox__caption"></figcaption>
+        </figure>
+
+      `;
+      document.body.appendChild(overlay);
+
+      const lbImg = overlay.querySelector(".kc-lightbox__img");
+      const caption = overlay.querySelector(".kc-lightbox__caption");
+      const closeBtn = overlay.querySelector(".kc-lightbox__close");
+
+      const open = (img) => {
+        const src = img.currentSrc || img.src;
+        const alt = img.getAttribute("alt") || "";
+        const cap = img.dataset.caption || alt;
+
+        lbImg.src = src;
+        lbImg.alt = alt;
+        caption.textContent = cap || "";
+        overlay.dataset.open = "true";
+
+        // 背景スクロール停止
+        document.documentElement.style.overflow = "hidden";
+      };
+
+      const close = () => {
+        overlay.dataset.open = "false";
+        lbImg.src = "";
+        caption.textContent = "";
+        document.documentElement.style.overflow = "";
+      };
+
+      // クリックで開く（カーソルも変える）
+      images.forEach((img) => {
+        img.classList.add("kc-lightboxable");
+        img.addEventListener("click", (e) => {
+          e.preventDefault();
+          open(img);
+        });
+      });
+
+      // backdrop/closeで閉じる
+      overlay.addEventListener("click", (e) => {
+        if (e.target.closest(".kc-lightbox__figure")) return;
+        close();
+      });
+      closeBtn.addEventListener("click", close);
+
+      // ESCで閉じる
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && overlay.dataset.open === "true") close();
+      });
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", ready);
+    } else {
+      ready();
+    }
+  })();
+</script>
+
+<style is:inline>
+  /* クリックできる感 */
+  article img.kc-lightboxable {
+    cursor: zoom-in;
+  }
+
+  .kc-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .18s ease;
+    display: grid;
+    place-items: center;
+
+    /* ★追加：端末幅計算のズレでも切れないように余白を確保 */
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  .kc-lightbox[data-open="true"] {
+    pointer-events: auto;
+    opacity: 1;
+  }
+
+  .kc-lightbox__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(8px);
+    cursor: zoom-out;
+  }
+
+  .kc-lightbox__figure {
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: 0;
+
+    /* ★追加：figure自体が画面からはみ出さないように */
+    max-width: 100%;
+    max-height: 100%;
+    margin: 0;
+  }
+
+  .kc-lightbox__img {
+    /* ★変更：vw/vh をやめて “安定viewport” + padding 分を差し引く */
+    max-width: min(1600px, calc(100svw - 32px));
+    max-height: calc(100svh - 32px);
+
+    width: auto;
+    height: auto;
+    object-fit: contain;
+
+    border-radius: 18px;
+    box-shadow: 0 18px 60px rgba(0,0,0,.5);
+    transform: translateY(6px) scale(.98);
+    transition: transform .18s ease;
+    background: rgba(255,255,255,.03);
+
+    /* 念のため：imgはブロック化して微妙なズレを消す */
+    display: block;
+  }
+
+  .kc-lightbox[data-open="true"] .kc-lightbox__img {
+    transform: translateY(0) scale(1);
+  }
+
+  .kc-lightbox__close {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.18);
+    background: rgba(20,20,20,.35);
+    color: rgba(255,255,255,.9);
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+  }
+
+  .kc-lightbox__caption {
+    margin-top: 12px;
+
+    /* ★変更：キャプションも安定viewportで */
+    max-width: min(1100px, calc(100svw - 32px));
+
+    color: rgba(255,255,255,.75);
+    font-size: 14px;
+    text-align: center;
+  }
+
+  /* --- フォールバック（svw/svh未対応のブラウザ向け） --- */
+  @supports not (width: 100svw) {
+    .kc-lightbox__img {
+      max-width: min(1600px, calc(100vw - 32px));
+      max-height: calc(100vh - 32px);
+    }
+    .kc-lightbox__caption {
+      max-width: min(1100px, calc(100vw - 32px));
+    }
+  }
+</style>

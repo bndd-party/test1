@@ -1,16 +1,60 @@
 ---
-import Social from './Social.astro';
----
-<style>
-  footer {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-  }
-</style>
+const year = new Date().getFullYear();
 
-<footer>
-    <Social platform="twitter" username="astrodotbuild" />
-  <Social platform="github" username="withastro" />
-  <Social platform="youtube" username="astrodotbuild" />
+const pathname = Astro.url.pathname;
+// /en や /en/... を英語として扱う
+const isEn = pathname === "/en" || pathname.startsWith("/en/");
+
+const t = isEn
+  ? {
+      title: "Kit Connect",
+      desc: "A personal log of scale modeling and photography.",
+      follow: "Follow",
+    }
+  : {
+      title: "Kit Connect",
+      desc: "フィギュア・プラモデル制作と写真の記録",
+      follow: "Follow",
+    };
+
+const socials = [
+  { name: "X", href: "https://x.com/kit_connect" },
+  // 将来ここに追加
+  // { name: "YouTube", href: "" },
+  // { name: "BOOTH", href: "" },
+];
+---
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <p class="footer-title">{t.title}</p>
+      <p class="footer-description">{t.desc}</p>
+    </div>
+
+    <div class="footer-social" aria-label={t.follow}>
+      {socials.map((s) => (
+        <a
+          class="social-link"
+          href={s.href}
+          target="_blank"
+          rel="noopener noreferrer me"
+          aria-label={s.name}
+          title={s.name}
+        >
+          {s.name === "X" && (
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.64 7.584H.47l8.6-9.83L0 1.154h7.594l5.243 6.932 6.064-6.932zM17.61 20.644h2.039L6.486 3.24H4.298L17.61 20.644z"
+              />
+            </svg>
+          )}
+        </a>
+      ))}
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p>© {year} Kit Connect</p>
+  </div>
 </footer>

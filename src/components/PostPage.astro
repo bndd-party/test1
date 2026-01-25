@@ -1,0 +1,124 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getPublicPosts, getPublicEnPosts } from "@/lib/posts";
+import Lightbox from "./Lightbox.astro";
+
+type Props = {
+  post: any;
+  collectionName: "blog" | "enblog";
+  basePath: string; // "/blog" or "/en/blog"
+  tagsBasePath: string; // "/tags" or "/en/tags"
+  locale: string; // "ja-JP" or "en-US"
+  labels?: {
+    prev: string;
+    next: string;
+    navAria: string;
+  };
+};
+
+const {
+  post,
+  collectionName,
+  basePath,
+  tagsBasePath,
+  locale,
+  labels = {
+    prev: "← Previous",
+    next: "Next →",
+    navAria: "Post navigation",
+  },
+} = Astro.props as Props;
+
+const { Content } = await post.render();
+
+const hero = post.data.hero;
+const pageTitle = post.data.title;
+
+// 前後記事（pubDateでソート）
+const allPosts =
+  collectionName === "enblog"
+    ? await getPublicEnPosts()
+    : await getPublicPosts();
+
+const sorted = allPosts
+  .slice()
+  .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf());
+
+const index = sorted.findIndex((p) => p.slug === post.slug);
+const prevPost = index > 0 ? sorted[index - 1] : null;
+const nextPost = index >= 0 && index < sorted.length - 1 ? sorted[index + 1] : null;
+---
+
+<BaseLayout pageTitle={pageTitle} description={post.data.description}>
+  <div class="paper">
+    <article class="paper__inner post">
+      <header class="post-header">
+        <h1>{post.data.title}</h1>
+
+        {hero && (
+          <figure class="hero-wrap">
+            <img
+              class="hero-img"
+              src={hero}
+              alt={post.data.heroAlt ?? post.data.title}
+              loading="eager"
+              decoding="async"
+            />
+          </figure>
+        )}
+
+        <time datetime={post.data.pubDate.toISOString()}>
+          {post.data.pubDate.toLocaleDateString(locale)}
+        </time>
+
+        {post.data.tags && (
+          <ul class="tags">
+            {post.data.tags.map((tag) => (
+              <li>
+                <a class="tag-link" href={`${tagsBasePath}/${tag}/`}>#{tag}</a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </header>
+
+      <section class="post-content">
+        <Content />
+      </section>
+
+      <nav class="post-nav" aria-label={labels.navAria}>
+        {prevPost && (
+          <a class="post-nav__item is-prev" href={`${basePath}/${prevPost.slug}/`}>
+            {prevPost.data.hero && (
+              <img class="post-nav__thumb" src={prevPost.data.hero} alt="" loading="lazy" decoding="async" />
+            )}
+            <div class="post-nav__meta">
+              <div class="post-nav__kicker">{labels.prev}</div>
+              <div class="post-nav__title">{prevPost.data.title}</div>
+              <time class="post-nav__time" datetime={prevPost.data.pubDate.toISOString()}>
+                {prevPost.data.pubDate.toLocaleDateString(locale)}
+              </time>
+            </div>
+          </a>
+        )}
+
+        {nextPost && (
+          <a class="post-nav__item is-next" href={`${basePath}/${nextPost.slug}/`}>
+            <div class="post-nav__meta">
+              <div class="post-nav__kicker">{labels.next}</div>
+              <div class="post-nav__title">{nextPost.data.title}</div>
+              <time class="post-nav__time" datetime={nextPost.data.pubDate.toISOString()}>
+                {nextPost.data.pubDate.toLocaleDateString(locale)}
+              </time>
+            </div>
+            {nextPost.data.hero && (
+              <img class="post-nav__thumb" src={nextPost.data.hero} alt="" loading="lazy" decoding="async" />
+            )}
+          </a>
+        )}
+      </nav>
+    </article>
+
+    <Lightbox />
+  </div>
+</BaseLayout>

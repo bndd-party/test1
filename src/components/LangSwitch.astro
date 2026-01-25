@@ -1,0 +1,34 @@
+---
+const path = Astro.url.pathname; // 例: "/", "/blog/xxx/", "/blog/page/2/", "/en/tags/Greeting/"
+const isEn = path.startsWith('/en');
+
+// タグ詳細かどうか（一覧は除外）
+const isJaTagDetail = path.startsWith('/tags/') && path !== '/tags/';
+const isEnTagDetail = path.startsWith('/en/tags/') && path !== '/en/tags/';
+
+// ✅ blog のページネーション判定
+const isJaBlogPaged = /^\/blog\/page\/\d+\/$/.test(path);
+const isEnBlogPaged = /^\/en\/blog\/page\/\d+\/$/.test(path);
+
+// ✅ Enタグ詳細 → Ja は日本語タグ一覧へ退避
+const jaPath = isEnTagDetail
+  ? '/tags/'
+  : isEnBlogPaged
+    ? '/blog/'
+    : (isEn ? path.replace(/^\/en(\/|$)/, '/') : path);
+
+// ✅ Jaタグ詳細 → En は英語タグ一覧へ退避
+const enPath = isJaTagDetail
+  ? '/en/tags/'
+  : isJaBlogPaged
+    ? '/en/blog/'
+    : (isEn ? path : (path === '/' ? '/en/' : `/en${path}`));
+
+const current = isEn ? 'En' : 'Ja';
+---
+
+<div class="lang-switch" aria-label="Language switch">
+  <a class={`lang-link ${!isEn ? 'lang-current' : ''}`} href={jaPath}>Ja</a>
+  <span aria-hidden="true">|</span>
+  <a class={`lang-link ${isEn ? 'lang-current' : ''}`} href={enPath}>En</a>
+</div>

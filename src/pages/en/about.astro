@@ -1,0 +1,79 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+const pageTitle = "About";
+---
+
+<BaseLayout pageTitle={pageTitle} description="About this site.">
+  <section class="about">
+    <h1>About Kit Connect</h1>
+
+    <p class="lead">
+      Kit Connect is a personal blog about figure and model making, painting, and doll photography.
+    </p>
+
+    <p>
+      Rather than focusing only on finished works,  
+      this site also shares the creative process — including experiments, mistakes, and small discoveries along the way.
+    </p>
+
+    <h2>What you can find here</h2>
+    <ul>
+      <li>Figure and model build logs</li>
+      <li>Painting notes and techniques</li>
+      <li>Figure reviews</li>
+      <li>Doll photography</li>
+    </ul>
+
+    <p>
+      Everything is shared in a relaxed and casual way.
+    </p>
+
+    <h2>About the creator</h2>
+
+<div class="about-author">
+  <a
+    href="https://x.com/kit_connect"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="about-author-link"
+  >
+    <img
+      src="/images/profile/icon.avif"
+      alt="Kit Connect creator icon"
+      class="about-author-icon"
+    />
+
+    <p class="about-author-name">
+      Kit Connect
+    </p>
+  </a>
+
+  <div class="about-author-text">
+    <p>
+      I enjoy building and painting models as a personal hobby.  
+      This site was created to document the process, not just the final results.
+    </p>
+
+    <p>
+      If it inspires or encourages others who enjoy creative hobbies,  
+      I would be very happy.
+    </p>
+  </div>
+</div>
+
+
+    <h2>About image usage</h2>
+    <p>
+      All images on this site include a watermark to help prevent unintended reuse.
+    </p>
+
+    <p>
+      Some images may be slightly harder to see,  
+      but this is a small effort to keep the site comfortable and enjoyable as a personal hobby space.
+    </p>
+
+    <p>
+      Please do not reuse or redistribute the images without permission.
+    </p>
+  </section>
+</BaseLayout>

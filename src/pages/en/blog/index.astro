@@ -1,0 +1,37 @@
+---
+import { getPublicEnPosts } from "@/lib/posts";
+import BlogIndexShell from "../../../components/BlogIndexShell.astro";
+import { buildArchive } from "../../../lib/archive";
+
+const pageTitle = "Blog";
+const pageSize = 6;
+
+const posts = await getPublicEnPosts();
+const sorted = posts.slice().sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const first = sorted.slice(0, pageSize);
+const lastPage = Math.max(1, Math.ceil(sorted.length / pageSize));
+const hasNext = sorted.length > pageSize;
+
+const archive = buildArchive(sorted);
+---
+
+<BlogIndexShell
+  pageTitle={pageTitle}
+  heroTitle="Blog"
+  heroLead="Photos of figures and dolls, build logs, and little lessons learned along the way."
+  locale="en-US"
+  basePath="/en/blog"
+  posts={first}
+  pager={{
+    current: 1,
+    last: lastPage,
+    prevUrl: null,
+    nextUrl: hasNext ? "/en/blog/page/2/" : null,
+    ariaLabel: "Pagination",
+    newerLabel: "← Newer",
+    olderLabel: "Older →",
+  }}
+  archive={archive}
+  archiveLabels={{ open: "Archive", title: "Archive", close: "Close", monthSuffix: "" }}
+/>

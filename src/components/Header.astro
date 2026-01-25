@@ -1,12 +1,54 @@
 ---
-import Hamburger from './Hamburger.astro';
-import Navigation from './Navigation.astro';
-import ThemeIcon from './ThemeIcon.astro';
+import Navigation from "./Navigation.astro";
+import LangSwitch from "./LangSwitch.astro";
+import SearchButton from "./SearchButton.astro";
+import Hamburger from "./Hamburger.astro";
+
+const isEn = Astro.url.pathname.startsWith("/en");
+const tagline = isEn ? "Here for tiny worlds." : "Tadano otaku desu";
+const homeHref = isEn ? "/en/" : "/";
 ---
-<header>
-  <nav>
-    <Hamburger />
-    <ThemeIcon />
-    <Navigation />
-  </nav>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="site-brand">
+      <a href={homeHref} aria-label={isEn ? "Kit Connect Home" : "Kit Connect ホーム"}>
+        <span class="site-title">Kit Connect</span>
+        <p class="site-tagline">{tagline}</p>
+      </a>
+    </div>
+
+    <!-- PC用ナビ -->
+    <nav class="site-nav site-nav--desktop" aria-label="メインナビゲーション">
+      <Navigation />
+    </nav>
+
+    <!-- 操作系 -->
+    <div class="site-actions" aria-label="表示設定と操作">
+     <LangSwitch />
+
+     <!-- 検索トグルボタン（既存の虫眼鏡） -->
+     <SearchButton />
+
+     <!-- デュルルっと出る検索フォーム -->
+      <form class="header-search" action={isEn ? "/en/search" : "/search"} role="search">
+        <input
+         class="header-search-input"
+         name="q"
+         type="search"
+          placeholder="Search..."
+          aria-label="Search"
+       />
+     </form>
+
+      <Hamburger />
+    </div>
+  </div>
+
+  <!-- スマホ用メニュー（ハンバーガーで開く） -->
+  <div id="mobile-menu" class="mobile-menu">
+    <nav class="mobile-nav" aria-label="モバイルナビゲーション">
+      <Navigation />
+    </nav>
+  </div>
 </header>

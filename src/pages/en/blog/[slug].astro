@@ -1,0 +1,22 @@
+---
+import { getPublicEnPosts } from "@/lib/posts";
+import PostPage from "../../../components/PostPage.astro";
+
+export async function getStaticPaths() {
+  const posts = await getPublicEnPosts();
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+---
+
+<PostPage
+  post={post}
+  collectionName="enblog"
+  basePath="/en/blog"
+  tagsBasePath="/en/tags"
+  locale="en-US"
+/>

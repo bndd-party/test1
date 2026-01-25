@@ -1,0 +1,104 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const pageTitle = "Search";
+const description = "サイト内の記事を検索します。";
+---
+
+<BaseLayout pageTitle={pageTitle} description={description}>
+  <section class="search-page">
+    <h1>Search</h1>
+
+    <p class="lead">キーワードで記事タイトル・概要・本文を検索できます。</p>
+
+    <div class="search-box">
+      <input id="q" type="search" placeholder="例：SD / 塗装 / 失敗 / ボークス" />
+      <button id="btn" type="button">検索</button>
+    </div>
+
+    <p class="hint">
+      ※ いまは簡易版
+    </p>
+
+    <div id="results" class="results" aria-live="polite"></div>
+  </section>
+
+  <script type="module">
+    const input = document.getElementById("q");
+    const btn = document.getElementById("btn");
+    const results = document.getElementById("results");
+
+    const escapeHtml = (s) =>
+      s.replaceAll("&", "&amp;")
+       .replaceAll("<", "&lt;")
+       .replaceAll(">", "&gt;")
+       .replaceAll('"', "&quot;")
+       .replaceAll("'", "&#039;");
+
+    async function loadIndex() {
+      const res = await fetch("/search-index.json");
+      if (!res.ok) throw new Error("search-index.json が見つかりません");
+      return await res.json();
+    }
+
+    function render(items, query) {
+      if (!query) {
+        results.innerHTML = "";
+        return;
+      }
+      if (!items.length) {
+        results.innerHTML = `<p class="empty">「${escapeHtml(query)}」に一致する記事は見つかりませんでした。</p>`;
+        return;
+      }
+
+      results.innerHTML = `
+        <ul class="result-list">
+          ${items
+            .map(
+              (p) => `
+            <li class="result-item">
+              <a href="${p.url}">${escapeHtml(p.title)}</a>
+              ${p.description ? `<p>${escapeHtml(p.description)}</p>` : ""}
+              ${p.pubDate ? `<time datetime="${p.pubDate}">${escapeHtml(p.pubDate)}</time>` : ""}
+            </li>
+          `
+            )
+            .join("")}
+        </ul>
+      `;
+    }
+
+    function normalize(s) {
+      return (s ?? "").toLowerCase();
+    }
+
+    async function run() {
+      const query = input.value.trim();
+      const index = await loadIndex();
+
+        // ★JPページでは日本語だけ（en を除外）
+      const filtered = index.filter((p) => p.lang !== "en"); 
+
+      const q = normalize(query);
+      const hits = filtered.filter((p) => {
+        const hay = normalize([p.title, p.description, p.body].join(" "));
+        return hay.includes(q);
+      });
+
+      render(hits, query);
+    }
+
+    btn.addEventListener("click", run);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") run();
+    });
+
+    // URLの ?q= を拾って自動検索
+    const params = new URLSearchParams(location.search);
+    const q0 = params.get("q");
+    if (q0) {
+      input.value = q0;
+      run();
+    }
+  </script>
+</BaseLayout>

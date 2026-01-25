@@ -1,0 +1,131 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getPublicPosts } from "@/lib/posts";
+
+export async function getStaticPaths({ paginate }) {
+  const posts = await await getPublicPosts();
+  const sorted = posts.slice().sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+ // いったん全部ページを作る
+  const pages = paginate(sorted, { pageSize: 6 });
+
+  // /blog/page/1/ を消す（= 1ページ目は /blog/ に統一）
+  return pages.filter((p) => p.params?.page !== "1");
+}
+
+const { page } = Astro.props;
+const pageTitle = "Blog";
+
+const prevUrl = page.currentPage === 2 ? "/blog/" : (page.url.prev ?? null);
+
+const postsAll = await await getPublicPosts();
+const sorted = postsAll.slice().sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+// posts から「年月の一覧（存在する月だけ）」を作る
+const archiveMap = new Map(); // year -> Set(month)
+for (const p of sorted /* または posts */) {
+  const d = p.data.pubDate;
+  const y = String(d.getFullYear());
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  if (!archiveMap.has(y)) archiveMap.set(y, new Set());
+  archiveMap.get(y).add(m);
+}
+
+// 年は新しい順、月も新しい順に並べる
+const archiveYears = [...archiveMap.keys()].sort((a, b) => Number(b) - Number(a));
+const archive = archiveYears.map((y) => ({
+  year: y,
+  months: [...archiveMap.get(y)].sort((a, b) => Number(b) - Number(a)),
+}));
+
+---
+
+<BaseLayout pageTitle={pageTitle}>
+  <header class="blog-hero">
+    <h1 class="blog-title">Blog</h1>
+    <p class="blog-lead">フィギュアとドールの写真、制作の記録、失敗談などを置いていきます。</p>
+    <div class="blog-divider" aria-hidden="true"></div>
+    <div class="blog-hero__actions">
+      <button class="archive-btn" type="button" data-archive-open>Archive</button>
+    </div>
+
+  </header>
+
+  <section class="blog-list">
+    {page.data.map((post) => {
+      const cover = post.data.coverImage ?? post.data.hero;
+      const tags = post.data.tags ?? [];
+      return (
+        <a class="blog-card" href={`/blog/${post.slug}/`} aria-label={post.data.title}>
+          <div class="blog-card__thumb" aria-hidden="true">
+            {cover ? <img src={cover} alt="" loading="lazy" decoding="async" /> : null}
+          </div>
+
+          <div class="blog-card__body">
+            <h2 class="blog-card__title">{post.data.title}</h2>
+            <time class="blog-card__date" datetime={post.data.pubDate.toISOString()}>
+              {post.data.pubDate.toLocaleDateString("ja-JP")}
+            </time>
+            {post.data.description && <p class="blog-card__desc">{post.data.description}</p>}
+            {tags.length > 0 && (
+              <div class="blog-card__tags">{tags.map((t) => <span class="tag">#{t}</span>)}</div>
+            )}
+          </div>
+        </a>
+      );
+    })}
+  </section>
+
+  <nav class="pager" aria-label="ページネーション">
+    {prevUrl ? <a class="pager__btn" href={prevUrl}>← Newer</a> : <span class="pager__btn is-disabled">← Newer</span>}
+    <span class="pager__meta">{page.currentPage} / {page.lastPage}</span>
+    {page.url.next ? <a class="pager__btn" href={page.url.next}>Older →</a> : <span class="pager__btn is-disabled">Older →</span>}
+  </nav>
+
+  <dialog class="archive-dialog" data-archive-dialog>
+  <div class="archive-dialog__inner">
+    <div class="archive-dialog__head">
+      <h2 class="archive-dialog__title">Archive</h2>
+      <button class="archive-dialog__close" type="button" data-archive-close aria-label="Close">×</button>
+    </div>
+
+    <div class="archive-grid">
+      {archive.map((y) => (
+        <section class="archive-year">
+          <h3 class="archive-year__title">{y.year}</h3>
+          <div class="archive-months">
+            {y.months.map((m) => (
+              <a class="archive-month" href={`/blog/archive/${y.year}/${m}/`}>
+                {m}月
+              </a>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+
+    <div class="archive-dialog__foot">
+      <button class="archive-btn" type="button" data-archive-close>Close</button>
+    </div>
+  </div>
+</dialog>
+
+<script is:inline>
+  const openBtn = document.querySelector("[data-archive-open]");
+  const dlg = document.querySelector("[data-archive-dialog]");
+  const closeBtns = document.querySelectorAll("[data-archive-close]");
+
+  if (openBtn && dlg) {
+    openBtn.addEventListener("click", () => dlg.showModal());
+    closeBtns.forEach((b) => b.addEventListener("click", () => dlg.close()));
+    dlg.addEventListener("click", (e) => {
+      // 背景クリックで閉じる（中身クリックは閉じない）
+      const rect = dlg.getBoundingClientRect();
+      const inDialog =
+        rect.top <= e.clientY && e.clientY <= rect.bottom &&
+        rect.left <= e.clientX && e.clientX <= rect.right;
+      if (!inDialog) dlg.close();
+    });
+  }
+</script>
+
+</BaseLayout>

@@ -1,0 +1,58 @@
+---
+import { getPublicEnPosts } from "@/lib/posts";
+import BlogIndexShell from "@/components/BlogIndexShell.astro";
+import { buildArchive } from "@/lib/archive";
+
+export async function getStaticPaths() {
+  const posts = await getPublicEnPosts();
+
+  const keys = new Set(
+    posts.map((p) => {
+      const d = p.data.pubDate;
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      return `${y}-${m}`;
+    }),
+  );
+
+  return [...keys].map((key) => {
+    const [year, month] = key.split("-");
+    return { params: { year, month } };
+  });
+}
+
+const { year, month } = Astro.params;
+
+const posts = await getPublicEnPosts();
+const filtered = posts
+  .filter((p) => {
+    const d = p.data.pubDate;
+    const y = String(d.getFullYear());
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    return y === year && m === month;
+  })
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+// 月別ページでもarchiveダイアログを出したいなら（任意）
+const archive = buildArchive(posts);
+---
+
+<BlogIndexShell
+  pageTitle={`Archive ${year}/${month}`}
+  heroTitle="Archive"
+  heroLead={`Posts from ${year}/${month}`}
+  locale="en-US"
+  basePath="/en/blog"
+  posts={filtered}
+  pager={{
+    current: 1,
+    last: 1,
+    prevUrl: "/en/blog/",
+    nextUrl: null,
+    ariaLabel: "Back",
+    newerLabel: "← Back to Blog",
+    olderLabel: "",
+  }}
+  archive={archive}
+  archiveLabels={{ open: "Archive", title: "Archive", close: "Close", monthSuffix: "" }}
+/>

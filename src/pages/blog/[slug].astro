@@ -1,0 +1,23 @@
+---
+import { getPublicPosts } from "@/lib/posts";
+import PostPage from "../../components/PostPage.astro";
+
+export async function getStaticPaths() {
+  const posts = await getPublicPosts();
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+---
+
+<PostPage
+  post={post}
+  collectionName="blog"
+  basePath="/blog"
+  tagsBasePath="/tags"
+  locale="ja-JP"
+  labels={{ prev: "← 前の記事", next: "次の記事 →", navAria: "記事ナビゲーション" }}
+/>

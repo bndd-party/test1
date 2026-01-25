@@ -1,10 +1,14 @@
-// @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig } from "astro/config";
+import { fileURLToPath } from "url";
 
-import preact from "@astrojs/preact";
-
-// https://astro.build/config
 export default defineConfig({
-  site: "https://example.com",
-  integrations: [preact()]
+  site: "https://あなたのドメイン.example",
+
+  vite: {
+    resolve: {
+      alias: {
+        "@": fileURLToPath(new URL("./src", import.meta.url)),
+      },
+    },
+  },
 });

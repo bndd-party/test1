@@ -1,45 +1,84 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 
-const pageTitle = "私について";
-const identity = {
-  firstName: "サラ",
-  country: "カナダ",
-  occupation: "技術ライター",
-  hobbies: ["写真", "バードウォッチング", "野球"],
-};
-
-const skills = ["HTML", "CSS", "JavaScript", "React", "Astro", "ドキュメントの執筆"];
-const happy = true;
-const finished = true;
-const goal = 3;
-
-const skillColor = "navy";
-const fontWeight = "bold";
-const textCase = "uppercase";
+const pageTitle = "About";
 ---
 
 <BaseLayout pageTitle={pageTitle}>
-  <h2>... そして私の新しいAstroサイトについて！</h2>
+  <section class="about">
+    <h1>About Kit Connect</h1>
 
-  <p>私はAstroの入門チュートリアルを進めています。これは私のウェブサイトの2番目のページで、自分で作った初めてのページです！</p>
+    <p class="lead">
+      Kit Connect は、フィギュア・プラモデル制作と塗装の記録を残すための個人ブログです。<br>
 
-  <p>このサイトはチュートリアルを進めるにつれて更新されていきます。定期的にチェックして、私の旅の様子を見に来てください！</p>
-  <p>以下は私に関するいくつかの事実です。</p>
-<ul>
-  <li>私の名前は{identity.firstName}です。</li>
-  <li>{identity.country}に住んでおり、{identity.occupation}として働いています。</li>
-  {identity.hobbies.length >= 2 &&
-    <li>私の2つの趣味は{identity.hobbies[0]}と{identity.hobbies[1]}です。</li>
-  }
-</ul>
-<p>私のスキルは以下の通りです。</p>
-<ul>
-  {skills.map((skill) => <li class="skill">{skill}</li>)}
-  {happy && <p>I am happy to be learning Astro! Astroを学べて幸せです！</p>}
+      完成写真だけでなく、制作途中の試行錯誤や気づきも含めて、<br>
+      「あとから振り返れる記録」としてまとめています。
+    </p>
 
-{finished && <p>I finished this tutorial! このチュートリアルを終えました！</p>}
+    <h2>このサイトについて</h2>
+    <ul>
+      <li>フィギュア・プラモデルの制作記録</li>
+      <li>塗装方法や試したことのメモ</li>
+      <li>フィギュアレビュー</li>
+      <li>ドールフォト</li>
+    </ul>
+    <p>
+      などなど、気軽に楽しく書いています。
+    </p>
 
-{goal === 3 ? <p>My goal is to finish in 3 days. 3日で終えるのが目標です。</p> : <p>My goal is not 3 days. 3日が目標ではありません。</p>}
-</ul>
+    <h2>運営者について</h2>
+
+    <div class="about-author">
+        <a
+          href="https://x.com/kit_connect"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="about-author-link"
+        >
+        <img
+          src="/images/profile/icon.avif"
+          alt="Kit Connect 管理人アイコン"
+          class="about-author-icon"
+        />
+
+        <p class="about-author-name">
+          Kit Connect 管理人
+        </p>
+      </a>
+
+    <div class="about-author-text">
+
+      <p>
+        普段は模型制作を趣味として続けています。  
+        完成品だけでなく、制作途中や試行錯誤の過程も含めて
+        楽しんで共有したいと思い、このサイトを立ち上げました。
+      </p>
+
+     <p>
+        同じように制作を楽しんでいる方の参考になったり、ちょっと気分転換に覗ける場所になれば嬉しいです。
+     </p>
+
+    </div>
+   </div>
+
+    <h2>画像の取り扱いについて</h2>
+    <p>
+      本サイトの画像には、すべてウォーターマークを入れています。<br>
+      意図しない形で使われてしまうことを防ぐための対応です。
+    </p>
+
+    <p>
+      少し見づらい部分もあるかもしれませんが、個人の趣味ブログとして気持ちよく続けていくための工夫として、
+      ご理解いただけると嬉しいです。
+    </p>
+
+    <p>
+      画像の転載は禁止・再利用はご遠慮ください。
+    </p>
+
+    <p class="about-note">
+      ご挨拶記事はこちら<br />
+      <a href="/blog/2026-01-21/">👉 ご挨拶ページ</a>
+    </p>
+  </section>
 </BaseLayout>

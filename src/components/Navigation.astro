@@ -1,8 +1,12 @@
 ---
+const path = Astro.url.pathname;           // 例: /en/blog/xxx/
+const isEn = path.startsWith('/en');
+const prefix = isEn ? '/en' : '';
 ---
-<div class="nav-links">
-  <a href="/">Home</a>
-  <a href="/about">About</a>
-  <a href="/blog">Blog</a>
-  <a href="/tags/">タグ</a>
-</div>
+
+<ul class="nav-list">
+  <li><a href={`${prefix}/`}>Home</a></li>
+  <li><a href={`${prefix}/about`}>About</a></li>
+  <li><a href={`${prefix}/blog`}>Blog</a></li>
+  <li><a href={`${prefix}/tags/`}>Tags</a></li>
+</ul>

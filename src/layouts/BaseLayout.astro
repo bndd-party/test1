@@ -1,26 +1,38 @@
 ---
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import '../styles/global.css';
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/global.css";
 
-const { pageTitle } = Astro.props;;
+const { pageTitle, description } = Astro.props;
 ---
 
-<html lang="ja">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>{pageTitle}</title>
-	</head>
-	<body>
+<!DOCTYPE html>
+<html lang={Astro.url.pathname.startsWith("/en") ? "en" : "ja"}>
+
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{pageTitle}</title>
+    {description && <meta name="description" content={description} />}
+  </head>
+
+  <body>
     <Header />
-		<h1>{pageTitle}</h1>
+
+    <main id="content">
+      <div class="page-container">
         <slot />
-		    <Footer />
-  <script>
-    import "../scripts/menu.js";
-  </script>
-	</body>
+      </div>
+    </main>
+
+    <Footer />
+
+    <script src="/scripts/menu.js" defer></script>
+    <script src="/scripts/header-hide.js" defer></script>
+    <script src="/scripts/header-ui.js" defer></script>
+
+  </body>
 </html>

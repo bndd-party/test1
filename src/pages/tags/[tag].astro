@@ -1,27 +1,88 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import BlogPost from '../../components/BlogPost.astro';
+import { getPublicPosts } from '../../lib/posts';
 
 export async function getStaticPaths() {
-  const allPosts = Object.values(import.meta.glob('../posts/*.md', { eager: true }));
+  const posts = await getPublicPosts();
+  const tags = [...new Set(posts.flatMap((post: any) => post.data.tags ?? []))];
 
-  const uniqueTags = [...new Set(allPosts.map((post: any) => post.frontmatter.tags).flat())];
-
-  return uniqueTags.map((tag) => {
-    const filteredPosts = allPosts.filter((post: any) => post.frontmatter.tags.includes(tag));
-    return {
-      params: { tag },
-      props: { posts: filteredPosts },
-    };
-  });
+  return tags.map((tag) => ({
+    params: { tag },
+  }));
 }
 
-const { tag } = Astro.params;
-const { posts } = Astro.props;
+const raw = Astro.params.tag ?? '';
+const tag = Astro.params.tag ?? '';
+
+// 指定タグの記事だけ取得（新しい順）
+const posts = (await getPublicPosts())
+  .filter((post: any) => post.data.tags?.includes(tag))
+  .sort((a: any, b: any) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const pageTitle = `#${tag}`;
 ---
-<BaseLayout pageTitle={tag}>
-  <p>{tag}のタグが付いた記事</p>
-  <ul>
-    {posts.map((post: any) => <BlogPost url={post.url} title={post.frontmatter.title}/>)}
-  </ul>
+
+<BaseLayout pageTitle={pageTitle}>
+  <section class="tag-page">
+    <header class="tag-header">
+      <a class="back" href="/tags/">← Tags</a>
+      <h1>#{tag}</h1>
+      <p class="meta">{posts.length} 件の記事</p>
+    </header>
+
+    {posts.length === 0 ? (
+      <p class="empty">このタグの記事はまだありません。</p>
+    ) : (
+      <ul class="tag-posts">
+        {posts.map((post) => (
+          <li class="post-card">
+            <a class="post-link" href={`/blog/${post.slug}/`}>
+              <div class="post-top">
+                <h2 class="title">{post.data.title}</h2>
+                <time class="date" datetime={post.data.pubDate.toISOString()}>
+                  {post.data.pubDate.toLocaleDateString('ja-JP')}
+                </time>
+              </div>
+
+              {post.data.description ? (
+                <p class="desc">{post.data.description}</p>
+              ) : null}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+
+  <style>
+    .tag-page { max-width: 920px; margin: 0 auto; padding: 2.5rem 1rem 4rem; }
+    .tag-header { margin: 0 0 1.25rem; }
+    .back {
+      display: inline-block;
+      margin: 0 0 .75rem;
+      text-decoration: none;
+      opacity: .8;
+    }
+    .back:hover { opacity: 1; text-decoration: underline; }
+    .tag-header h1 { margin: 0 0 .25rem; font-size: clamp(2rem, 4vw, 2.6rem); }
+    .meta { margin: 0; opacity: .75; }
+
+    .empty { margin-top: 1.5rem; opacity: .85; }
+
+    .tag-posts { list-style: none; padding: 0; margin: 1.5rem 0 0; display: grid; gap: .8rem; }
+    .post-card {
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 16px;
+      background: rgba(0,0,0,.12);
+      overflow: hidden;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+    }
+    .post-card:hover { transform: translateY(-1px); border-color: rgba(255,255,255,.28); background: rgba(0,0,0,.18); }
+
+    .post-link { display: block; padding: 1rem 1rem .95rem; text-decoration: none; color: inherit; }
+    .post-top { display: flex; gap: .75rem; align-items: baseline; justify-content: space-between; flex-wrap: wrap; }
+    .title { margin: 0; font-size: 1.1rem; }
+    .date { opacity: .75; font-size: .95rem; white-space: nowrap; }
+    .desc { margin: .55rem 0 0; opacity: .85; line-height: 1.6; }
+  </style>
 </BaseLayout>

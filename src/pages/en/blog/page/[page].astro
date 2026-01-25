@@ -1,0 +1,41 @@
+---
+import { getPublicEnPosts } from "@/lib/posts";
+import BlogIndexShell from "../../../../components/BlogIndexShell.astro";
+import { buildArchive } from "../../../../lib/archive";
+import BaseLayout from "../../../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths({ paginate }) {
+  const posts = await await getPublicEnPosts();
+  const sorted = posts.slice().sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+  const pages = paginate(sorted, { pageSize: 6 });
+  return pages.filter((p) => p.params?.page !== "1");
+}
+
+const { page } = Astro.props;
+
+const postsAll = await await getPublicEnPosts();
+const sorted = postsAll.slice().sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const archive = buildArchive(sorted);
+
+const prevUrl = page.currentPage === 2 ? "/en/blog/" : (page.url.prev ?? null);
+---
+
+<BlogIndexShell
+  pageTitle="Blog"
+  heroTitle="Blog"
+  heroLead="Photos of figures and dolls, build logs, and little lessons learned along the way."
+  locale="en-US"
+  basePath="/en/blog"
+  posts={page.data}
+  pager={{
+    current: page.currentPage,
+    last: page.lastPage,
+    prevUrl,
+    nextUrl: page.url.next ?? null,
+    ariaLabel: "Pagination",
+    newerLabel: "← Newer",
+    olderLabel: "Older →",
+  }}
+  archive={archive}
+  archiveLabels={{ open: "Archive", title: "Archive", close: "Close", monthSuffix: "" }}
+/>

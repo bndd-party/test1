@@ -1,9 +1,108 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Greeting from '../components/Greeting';
-const pageTitle = "Home Page";
+import { getPublicPosts } from "@/lib/posts";
+
+const pageTitle = "Kit Connect";
+
+// 全記事取得
+const posts = await getPublicPosts();
+
+// 新しい順に並び替え → 上位3件だけ
+const latestPosts = posts
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 4);
 ---
+
 <BaseLayout pageTitle={pageTitle}>
-  <h2>私の素晴らしいブログのサブタイトル</h2>
-  <Greeting client:load messages={["Hej", "Hallo", "Hola", "Habari"]} />
+<section class="home-hero">
+  <div class="home-hero-inner">
+    <div class="home-hero-text">
+      <p class="home-hero-eyebrow">Figure Modeling & Painting</p>
+
+      <h1 class="home-hero-title">
+        Kit Connect<br />
+      </h1>
+
+      <p class="home-hero-description">
+        フィギュア・プラモデル制作と写真の記録。<br />
+        幸せなオタクの趣味ログです。小さな世界を求めてここにいます。
+      </p>
+    </div>
+
+    <div class="home-hero-media">
+      <img
+        src="/images/home/hero.avif"
+        alt="..."
+        loading="eager"
+        decoding="async"
+      />
+    </div>
+  </div>
+</section>
+
+<section class="home-latest">
+  <h2>最近の記事</h2>
+
+  <div class="latest-grid">
+    {latestPosts.map((post) => (
+      <article class="latest-tile">
+        <a class="latest-tile__link" href={`/blog/${post.slug}/`}>
+          <div class="latest-tile__thumb">
+            <img
+              src={post.data.coverImage ?? post.data.hero ?? "/images/home/hero.avif"}
+              alt={post.data.coverAlt ?? post.data.heroAlt ?? post.data.title}
+              loading="lazy"
+              decoding="async"
+            />
+
+          </div>
+
+          <h3 class="latest-tile__title">{post.data.title}</h3>
+        </a>
+        <time class="latest-tile__date" datetime={post.data.pubDate.toISOString()}>
+          {post.data.pubDate.toLocaleDateString('ja-JP', { year:'numeric', month:'2-digit', day:'2-digit' })}
+        </time>
+      </article>
+    ))}
+  </div>
+
+  <div class="more-link">
+    <a href="/blog">すべての記事を見る →</a>
+  </div>
+</section>
+
+<section class="home-aboutcats" aria-label="About and Categories">
+  <div class="home-aboutcats-inner">
+    <!-- 左：About -->
+    <section class="home-about" aria-label="About me">
+      <h2 class="home-section-title">About Me</h2>
+
+      <p class="home-about-text">
+        フィギュア・ドール・プラモデルの制作と写真を楽しんでいます。
+      </p>
+
+      <p class="home-about-sub">
+        作ること、撮ること、試行錯誤することが好きです。
+      </p>
+
+      <div class="home-about-links">
+        <a class="home-pill" href="/about">Read more →</a>
+      </div>
+    </section>
+
+    <article class="home-panel home-cats">
+      <h2 class="home-section-title">Categories</h2>
+
+      <ul class="cat-list">
+        <li><a class="cat-pill" href="/tags/フィギュア/">フィギュア</a></li>
+        <li><a class="cat-pill" href="/tags/プラモデル/">プラモデル</a></li>
+        <li><a class="cat-pill" href="/tags/ドール/">ドール</a></li>
+     </ul>
+
+      <a class="home-panel__cta" href="/tags">All tags →</a>
+   </article>
+  </div>
+</section>
+
 </BaseLayout>

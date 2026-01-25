@@ -1,0 +1,25 @@
+import { defineCollection, z } from "astro:content";
+
+const blogSchema = ({ image }: { image: any }) =>
+  z.object({
+    title: z.string(),
+    description: z.string().optional(),
+
+    // 重要：z.date() だと弾かれがちなので coerce にする
+    pubDate: z.coerce.date(),
+
+    tags: z.array(z.string()).optional(),
+
+    hero: z.string().nullable().optional(),
+    heroAlt: z.string().nullable().optional(),
+    coverImage: z.string().nullable().optional(),
+    coverAlt: z.string().nullable().optional(),
+
+
+    draft: z.boolean().optional().default(false),
+  });
+
+const blog = defineCollection({ schema: blogSchema });
+const enblog = defineCollection({ schema: blogSchema });
+
+export const collections = { blog, enblog };

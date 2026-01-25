@@ -1,0 +1,74 @@
+---
+import BaseLayout from "../../../../../layouts/BaseLayout.astro";
+import { getPublicPosts } from "@/lib/posts";
+
+export async function getStaticPaths() {
+  const posts = await getPublicPosts();
+
+  // 年月キー（YYYY-MM）を作る
+  const keys = new Set(
+    posts.map((p) => {
+      const d = p.data.pubDate;
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      return `${y}-${m}`;
+    }),
+  );
+
+  return [...keys].map((key) => {
+    const [year, month] = key.split("-");
+    return { params: { year, month } };
+  });
+}
+
+const { year, month } = Astro.params;
+
+const posts = await getPublicPosts();
+const filtered = posts
+  .filter((p) => {
+    const d = p.data.pubDate;
+    const y = String(d.getFullYear());
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    return y === year && m === month;
+  })
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const pageTitle = `Archive ${year}/${month}`;
+---
+
+<BaseLayout pageTitle={pageTitle}>
+  <header class="blog-hero">
+    <h1 class="blog-title">Archive</h1>
+    <p class="blog-lead">{year}/{month} の記事</p>
+    <div class="blog-divider" aria-hidden="true"></div>
+  </header>
+
+  <section class="blog-list">
+    {filtered.map((post) => {
+      const cover = post.data.coverImage ?? post.data.hero;
+      const tags = post.data.tags ?? [];
+      return (
+        <a class="blog-card" href={`/blog/${post.slug}/`} aria-label={post.data.title}>
+          <div class="blog-card__thumb" aria-hidden="true">
+            {cover ? <img src={cover} alt="" loading="lazy" decoding="async" /> : null}
+          </div>
+
+          <div class="blog-card__body">
+            <h2 class="blog-card__title">{post.data.title}</h2>
+            <time class="blog-card__date" datetime={post.data.pubDate.toISOString()}>
+              {post.data.pubDate.toLocaleDateString("ja-JP")}
+            </time>
+            {post.data.description && <p class="blog-card__desc">{post.data.description}</p>}
+            {tags.length > 0 && (
+              <div class="blog-card__tags">{tags.map((t) => <span class="tag">#{t}</span>)}</div>
+            )}
+          </div>
+        </a>
+      );
+    })}
+  </section>
+
+  <nav class="pager" aria-label="戻る">
+    <a class="pager__btn" href="/blog/">← Blogへ戻る</a>
+  </nav>
+</BaseLayout>

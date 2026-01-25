@@ -1,0 +1,141 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+type Post = any;
+
+type Props = {
+  pageTitle: string;
+  heroTitle: string;
+  heroLead: string;
+  locale: string; // "ja-JP" | "en-US"
+  basePath: string; // "/blog" | "/en/blog"
+  posts: Post[];
+  pager: {
+    current: number;
+    last: number;
+    prevUrl: string | null;
+    nextUrl: string | null;
+    ariaLabel?: string;
+    newerLabel?: string;
+    olderLabel?: string;
+  };
+  archive: Array<{ year: string; months: string[] }>;
+  archiveLabels?: {
+    open: string;
+    title: string;
+    close: string;
+    monthSuffix?: string; // "月" など
+  };
+};
+
+const {
+  pageTitle,
+  heroTitle,
+  heroLead,
+  locale,
+  basePath,
+  posts,
+  pager,
+  archive,
+  archiveLabels = { open: "Archive", title: "Archive", close: "Close", monthSuffix: "" },
+} = Astro.props as Props;
+---
+
+<BaseLayout pageTitle={pageTitle}>
+  <header class="blog-hero">
+    <h1 class="blog-title">{heroTitle}</h1>
+    <p class="blog-lead">{heroLead}</p>
+    <div class="blog-divider" aria-hidden="true"></div>
+
+    <div class="blog-hero__actions">
+      <button class="archive-btn" type="button" data-archive-open>{archiveLabels.open}</button>
+    </div>
+  </header>
+
+  <section class="blog-list">
+    {posts.map((post) => {
+      const cover = post.data.coverImage ?? post.data.hero;
+      const tags = post.data.tags ?? [];
+      return (
+        <a class="blog-card" href={`${basePath}/${post.slug}/`} aria-label={post.data.title}>
+          <div class="blog-card__thumb" aria-hidden="true">
+            {cover ? <img src={cover} alt="" loading="lazy" decoding="async" /> : null}
+          </div>
+
+          <div class="blog-card__body">
+            <h2 class="blog-card__title">{post.data.title}</h2>
+            <time class="blog-card__date" datetime={post.data.pubDate.toISOString()}>
+              {post.data.pubDate.toLocaleDateString(locale)}
+            </time>
+            {post.data.description && <p class="blog-card__desc">{post.data.description}</p>}
+            {tags.length > 0 && (
+              <div class="blog-card__tags">{tags.map((t) => <span class="tag">#{t}</span>)}</div>
+            )}
+          </div>
+        </a>
+      );
+    })}
+  </section>
+
+  <nav class="pager" aria-label={pager.ariaLabel ?? "Pagination"}>
+    {pager.prevUrl ? (
+      <a class="pager__btn" href={pager.prevUrl}>{pager.newerLabel ?? "← Newer"}</a>
+    ) : (
+      <span class="pager__btn is-disabled">{pager.newerLabel ?? "← Newer"}</span>
+    )}
+
+    <span class="pager__meta">{pager.current} / {pager.last}</span>
+
+    {pager.nextUrl ? (
+      <a class="pager__btn" href={pager.nextUrl}>{pager.olderLabel ?? "Older →"}</a>
+    ) : (
+      <span class="pager__btn is-disabled">{pager.olderLabel ?? "Older →"}</span>
+    )}
+  </nav>
+
+  <dialog class="archive-dialog" data-archive-dialog>
+    <div class="archive-dialog__inner">
+      <div class="archive-dialog__head">
+        <h2 class="archive-dialog__title">{archiveLabels.title}</h2>
+        <button class="archive-dialog__close" type="button" data-archive-close aria-label="Close">×</button>
+      </div>
+
+      <div class="archive-grid">
+        {archive.map((y) => (
+          <section class="archive-year">
+            <h3 class="archive-year__title">{y.year}</h3>
+            <div class="archive-months">
+              {y.months.map((m) => (
+                <a class="archive-month" href={`${basePath}/archive/${y.year}/${m}/`}>
+                  {archiveLabels.monthSuffix ? `${m}${archiveLabels.monthSuffix}` : m}
+                </a>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+
+      <div class="archive-dialog__foot">
+        <button class="archive-btn" type="button" data-archive-close>{archiveLabels.close}</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script is:inline>
+    const openBtn = document.querySelector("[data-archive-open]");
+    const dlg = document.querySelector("[data-archive-dialog]");
+    const closeBtns = document.querySelectorAll("[data-archive-close]");
+
+    if (openBtn && dlg) {
+      openBtn.addEventListener("click", () => dlg.showModal());
+      closeBtns.forEach((b) => b.addEventListener("click", () => dlg.close()));
+      dlg.addEventListener("click", (e) => {
+        const rect = dlg.getBoundingClientRect();
+        const inDialog =
+          rect.top <= e.clientY && e.clientY <= rect.bottom &&
+          rect.left <= e.clientX && e.clientX <= rect.right;
+        if (!inDialog) dlg.close();
+      });
+    }
+  </script>
+</BaseLayout>

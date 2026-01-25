@@ -1,32 +1,192 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-const allPosts = Object.values(import.meta.glob('../posts/*.md', { eager: true }));
-const tags = [...new Set(allPosts.map((post: any) => post.frontmatter.tags).flat())];
-const pageTitle = "タグインデックス";
+import { getPublicPosts } from '../../lib/posts';
+
+const pageTitle = "Tags";
+
+// 公開記事のみ
+const posts = await getPublicPosts();
+
+// tag -> count
+const tagCount = new Map<string, number>();
+for (const post of posts) {
+  for (const t of (post.data.tags ?? [])) {
+    tagCount.set(t, (tagCount.get(t) ?? 0) + 1);
+  }
+}
+
+const tags = [...tagCount.entries()]
+  .map(([name, count]) => ({ name, count }))
+  .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'ja'));
+
+// 「人気タグ」枠（必要なければ消してOK）
+const popular = tags.slice(0, 12);
+const all = tags;
 ---
+
 <BaseLayout pageTitle={pageTitle}>
-  <div class="tags">
-    {tags.map((tag) => (
-      <p class="tag"><a href={`/tags/${tag}`}>{tag}</a></p>
-    ))}
-  </div>
+  <section class="tags-page">
+    <header class="tags-header">
+      <h1>Tags</h1>
+      <p class="tags-sub">
+        タグから記事を探せます。気になるワードで絞り込みもできます。
+      </p>
+
+      <div class="tags-search">
+        <label class="sr-only" for="tagSearch">タグを検索</label>
+        <input id="tagSearch" type="search" placeholder="タグを検索（例：#美プラ / #フィギュア）" autocomplete="off" />
+        <span class="tags-count" id="tagCountText">{all.length} tags</span>
+      </div>
+    </header>
+
+    <section class="tags-block" id="popularBlock">
+      <h2>Popular</h2>
+      <div class="tags-list" id="popularTags">
+        {popular.map((t) => (
+          <a class="tag" href={`/tags/${encodeURIComponent(t.name)}/`} data-tag={t.name}>
+            <span class="tag-name">#{t.name}</span>
+            <span class="tag-badge" aria-label={`${t.count} posts`}>{t.count}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section class="tags-block" id="allBlock">
+      <h2>All tags</h2>
+      <div class="tags-list" id="allTags">
+        {all.map((t) => (
+          <a class="tag" href={`/tags/${encodeURIComponent(t.name)}/`} data-tag={t.name}>
+            <span class="tag-name">#{t.name}</span>
+            <span class="tag-badge" aria-label={`${t.count} posts`}>{t.count}</span>
+          </a>
+        ))}
+      </div>
+
+      <p class="tags-empty" id="noResults" hidden>該当するタグがありません。</p>
+    </section>
+  </section>
+
+
+<script>
+  const input = document.getElementById('tagSearch');
+  const noResults = document.getElementById('noResults');
+  const countText = document.getElementById('tagCountText');
+
+  const allLinks = Array.from(document.querySelectorAll('#allTags .tag'));
+  const popularLinks = Array.from(document.querySelectorAll('#popularTags .tag'));
+
+  const popularBlock = document.getElementById('popularBlock');
+  const allBlock = document.getElementById('allBlock');
+  const allHeading = allBlock?.querySelector('h2');
+
+  function normalize(s) {
+    return (s ?? '').trim().toLowerCase();
+  }
+
+  function applyFilter(raw) {
+    const query = normalize(raw);
+    const isSearching = query.length > 0;
+
+    // All tags: 部分一致で絞り込み
+    let visible = 0;
+    for (const a of allLinks) {
+      const name = normalize(a.getAttribute('data-tag'));
+      const ok = !isSearching || name.includes(query);
+      a.hidden = !ok;
+      if (ok) visible++;
+    }
+
+    // Popular: 検索中はブロックごと隠す（保険で中身も隠す）
+    if (popularBlock) popularBlock.hidden = isSearching;
+    for (const a of popularLinks) a.hidden = isSearching;
+
+    // 見出し
+    if (allHeading) allHeading.textContent = isSearching ? `Results (${visible})` : 'All tags';
+
+    // 「該当なし」表示
+    if (noResults) noResults.hidden = visible !== 0;
+
+    // カウント表示
+    if (countText) countText.textContent = `${visible} tags`;
+  }
+
+  function getVisibleMatches() {
+    return allLinks.filter((a) => !a.hidden);
+  }
+
+  if (input instanceof HTMLInputElement) {
+    input.addEventListener('input', () => applyFilter(input.value));
+
+    // Enter: 候補が1件ならそのタグへ
+    input.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      const matches = getVisibleMatches();
+      if (matches.length === 1) {
+        const href = matches[0].getAttribute('href');
+        if (href) window.location.href = href;
+      }
+    });
+
+    applyFilter('');
+  }
+  
+</script>
+
+
+
+  <style>
+    .tags-page { max-width: 920px; margin: 0 auto; padding: 2.5rem 1rem 4rem; }
+    .tags-header h1 { margin: 0 0 .25rem; font-size: clamp(2rem, 4vw, 2.6rem); }
+    .tags-sub { margin: 0 0 1.25rem; opacity: .85; }
+
+    .tags-search { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; margin: 0 0 1.75rem; }
+    .tags-search input {
+      flex: 1 1 320px;
+      padding: .7rem .9rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.18);
+      backdrop-filter: blur(8px);
+      color: inherit;
+      outline: none;
+    }
+    .tags-search input:focus { border-color: rgba(255,255,255,.35); }
+    .tags-count { opacity: .75; font-size: .95rem; }
+
+    .tags-block { margin: 1.5rem 0 0; }
+    .tags-block h2 { margin: 0 0 .75rem; font-size: 1.05rem; letter-spacing: .02em; opacity: .9; }
+
+    .tags-list { display: flex; flex-wrap: wrap; gap: .6rem; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      padding: .55rem .8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.12);
+      text-decoration: none;
+      color: inherit;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .tag:hover { transform: translateY(-1px); border-color: rgba(255,255,255,.30); background: rgba(0,0,0,.18); }
+    .tag-name { white-space: nowrap; }
+    .tag-badge {
+      display: inline-flex;
+      min-width: 1.8em;
+      justify-content: center;
+      padding: .15rem .5rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      font-size: .85rem;
+      opacity: .9;
+    }
+
+    .tags-empty { margin: 1rem 0 0; opacity: .8; }
+
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+  </style>
 </BaseLayout>
-<style>
-  a {
-    color: #00539F;
-  }
-
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-  }
-
-  .tag {
-    margin: 0.25em;
-    border: dotted 1px #a1a1a1;
-    border-radius: .5em;
-    padding: .5em 1em;
-    font-size: 1.15em;
-    background-color: #F8FCFD;
-  }
-</style>
