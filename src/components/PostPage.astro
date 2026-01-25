@@ -49,7 +49,12 @@ const prevPost = index > 0 ? sorted[index - 1] : null;
 const nextPost = index >= 0 && index < sorted.length - 1 ? sorted[index + 1] : null;
 ---
 
-<BaseLayout pageTitle={pageTitle} description={post.data.description}>
+<BaseLayout
+  pageTitle={pageTitle}
+  description={post.data.description}
+  ogImage={hero}
+>
+
   <div class="paper">
     <article class="paper__inner post">
       <header class="post-header">
