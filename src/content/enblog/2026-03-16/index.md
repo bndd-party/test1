@@ -2,7 +2,7 @@
 title: "Type 3 Chi-Nu Tank – Build & Paint Log"
 description: "Building and painting the FineMolds 1/35 Type 3 Chi-Nu from Girls und Panzer."
 pubDate: "2026-03-16"
-tags: ["tank", "plastic_model", "1/35", "painting"]
+tags: ["tank", "plastic_model", "scale-1-35", "painting"]
 hero: /images/blog/2026-03-16/hero.avif
 heroAlt: "Type 3 Chi-Nu tank model"
 ---
