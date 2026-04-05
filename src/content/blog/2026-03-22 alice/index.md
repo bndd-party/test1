@@ -1,7 +1,7 @@
 ---
 title: "フィギュアレビュー：FLARE「NIKKE アリス」"
 description: "フレアのフィギュア「アリス」を撮りました。"
-pubDate: "2026-01-25"
+pubDate: "2026-03-22"
 tags:
   - "フィギュア"
   - "レビュー"
