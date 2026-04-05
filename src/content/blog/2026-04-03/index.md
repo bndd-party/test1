@@ -90,7 +90,7 @@ glass eyes Ｎ×２様のアイに変更しました。カワイイ！
 
 <figure>
   <img src="/images/blog/2026-04-03/photo-1st.avif" alt="Volks SD F-32" />
-  <figcaption>我が家で初めて撮った一枚、当時のまま載せます。</figcaption>
+  <figcaption>お迎え日に我が家で初めて撮った一枚、当時のまま載せます。</figcaption>
 </figure>
 
 最初のブログを始めたのも、写真を撮るようになったのも、好きなものを言葉にして残そうと思ったのも、すべてはこの子がきっかけでした。  
