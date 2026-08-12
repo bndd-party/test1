@@ -4,7 +4,8 @@ import { getPublicEnPosts } from "@/lib/posts";
 
 const pageTitle = "Tags";
 
-const posts = await getPublicEnPosts();
+const posts = (await getPublicEnPosts())
+  .filter((p) => p.data.showInList !== false);
 
 // tag -> count
 const tagCount = new Map<string, number>();

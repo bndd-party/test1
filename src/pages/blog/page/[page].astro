@@ -4,7 +4,11 @@ import { getPublicPosts } from "@/lib/posts";
 
 export async function getStaticPaths({ paginate }) {
   const posts = await await getPublicPosts();
-  const sorted = posts.slice().sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+  const sorted = posts
+  .filter((p) => p.data.showInList !== false)
+  .slice()
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
  // いったん全部ページを作る
   const pages = paginate(sorted, { pageSize: 6 });
 
@@ -18,7 +22,10 @@ const pageTitle = "Blog";
 const prevUrl = page.currentPage === 2 ? "/blog/" : (page.url.prev ?? null);
 
 const postsAll = await await getPublicPosts();
-const sorted = postsAll.slice().sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const sorted = postsAll
+  .filter((p) => p.data.showInList !== false)
+  .slice()
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 // posts から「年月の一覧（存在する月だけ）」を作る
 const archiveMap = new Map(); // year -> Set(month)

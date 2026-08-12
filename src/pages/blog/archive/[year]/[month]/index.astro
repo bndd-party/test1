@@ -25,6 +25,7 @@ const { year, month } = Astro.params;
 
 const posts = await getPublicPosts();
 const filtered = posts
+  .filter((p) => p.data.showInList !== false)
   .filter((p) => {
     const d = p.data.pubDate;
     const y = String(d.getFullYear());

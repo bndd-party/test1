@@ -3,7 +3,8 @@ import { getPublicPosts } from "@/lib/posts";
 
 export async function GET(context) {
   // 公開済み記事のみ取得
-  const posts = await getPublicPosts();
+  const posts = (await getPublicPosts())
+   .filter((p) => p.data.showInList !== false);
 
   // 新しい順
   posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());

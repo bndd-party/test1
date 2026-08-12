@@ -10,6 +10,7 @@ const posts = await getPublicPosts();
 // 新しい順に並び替え → 上位3件だけ
 const latestPosts = posts
   .filter((p) => !p.data.draft)
+  .filter((p) => p.data.showInList !== false)
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 4);
 ---

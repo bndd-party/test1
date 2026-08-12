@@ -21,6 +21,9 @@ const baseSchema = z.object({
   // 下書きフラグ
   draft: z.boolean().default(false),
 
+  // 一覧表示フラグ（省略時は表示）
+  showInList: z.boolean().default(true),
+
   // ★追加：サムネ/ヒーロー（img運用なので文字列でOK）
   hero: z.string().optional(),
   heroAlt: z.string().optional(),

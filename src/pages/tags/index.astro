@@ -4,8 +4,9 @@ import { getPublicPosts } from '../../lib/posts';
 
 const pageTitle = "Tags";
 
-// 公開記事のみ
-const posts = await getPublicPosts();
+// 通常の一覧に表示する記事のみ
+const posts = (await getPublicPosts())
+  .filter((p) => p.data.showInList !== false);
 
 // tag -> count
 const tagCount = new Map<string, number>();

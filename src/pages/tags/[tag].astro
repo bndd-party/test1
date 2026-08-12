@@ -16,6 +16,7 @@ const tag = Astro.params.tag ?? '';
 
 // 指定タグの記事だけ取得（新しい順）
 const posts = (await getPublicPosts())
+  .filter((post: any) => post.data.showInList !== false)
   .filter((post: any) => post.data.tags?.includes(tag))
   .sort((a: any, b: any) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 

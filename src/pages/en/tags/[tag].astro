@@ -3,7 +3,8 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getPublicEnPosts } from "@/lib/posts";
 
 export async function getStaticPaths() {
-  const posts = await getPublicEnPosts();
+  const posts = (await getPublicEnPosts())
+   .filter((p) => p.data.showInList !== false);
 
   const uniqueTags = [...new Set(
     posts.flatMap((p) => p.data.tags ?? [])

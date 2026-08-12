@@ -7,7 +7,10 @@ const pageTitle = "Blog";
 const pageSize = 6;
 
 const posts = await getPublicEnPosts();
-const sorted = posts.slice().sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const sorted = posts
+  .filter((p) => p.data.showInList !== false)
+  .slice()
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 const first = sorted.slice(0, pageSize);
 const lastPage = Math.max(1, Math.ceil(sorted.length / pageSize));

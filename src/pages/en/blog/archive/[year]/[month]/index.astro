@@ -25,6 +25,7 @@ const { year, month } = Astro.params;
 
 const posts = await getPublicEnPosts();
 const filtered = posts
+  .filter((p) => p.data.showInList !== false)
   .filter((p) => {
     const d = p.data.pubDate;
     const y = String(d.getFullYear());
@@ -34,7 +35,9 @@ const filtered = posts
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 // 月別ページでもarchiveダイアログを出したいなら（任意）
-const archive = buildArchive(posts);
+const archive = buildArchive(
+  posts.filter((p) => p.data.showInList !== false)
+);
 ---
 
 <BlogIndexShell
