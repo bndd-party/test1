@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { getPublicPosts, getPublicEnPosts } from "@/lib/posts";
+import { getPublicPosts, getPublicEnPosts, isSearchExcludedPost } from "@/lib/posts";
 import Lightbox from "./Lightbox.astro";
 
 type Props = {
@@ -54,6 +54,7 @@ const nextPost = index >= 0 && index < sorted.length - 1 ? sorted[index + 1] : n
   pageTitle={pageTitle}
   description={post.data.description}
   ogImage={hero}
+  noIndex={isSearchExcludedPost(post)}
 >
 
   <div class="paper">

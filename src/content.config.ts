@@ -24,6 +24,9 @@ const baseSchema = z.object({
   // 一覧表示フラグ（省略時は表示）
   showInList: z.boolean().default(true),
 
+  // Exclude this article from search engines when set to true.
+  noIndex: z.boolean().default(false),
+
   // ★追加：サムネ/ヒーロー（img運用なので文字列でOK）
   hero: z.string().optional(),
   heroAlt: z.string().optional(),

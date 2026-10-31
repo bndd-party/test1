@@ -1,4 +1,4 @@
-import { getPublicPosts, getPublicEnPosts } from "@/lib/posts";
+import { getPublicPosts, getPublicEnPosts, isSearchExcludedPost } from "@/lib/posts";
 
 // Keep this in sync with `site` in astro.config.mjs.
 const SITE_URL = "https://kit-connect.netlify.app/";
@@ -95,6 +95,10 @@ export async function GET() {
 
   for (const collection of collections) {
     for (const post of collection.posts) {
+      // Do not advertise images from pages that carry noindex/noimageindex.
+      // Shared images can still be listed through other, indexable article pages.
+      if (isSearchExcludedPost(post)) continue;
+
       const slugPath = encodeSlugPath(post.slug);
       const pageUrl = new URL(`${collection.basePath}/${slugPath}/`, SITE_URL);
       const imageUrls = getArticleImageUrls(post, pageUrl);

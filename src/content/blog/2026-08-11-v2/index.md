@@ -3,6 +3,7 @@ title: "「兎野未桃＆未黄」完成記録　肌色バージョン"
 description: "グリズリーパンダ様のオリジナルガレージキット「兎野未桃」を組み立てて塗装しました"
 pubDate: "2026-08-11"
 showInList: false
+noIndex: true
 tags: ["ガレージキット", "ガレキ", "塗装", "グリズリーパンダ様"]
 hero: /images/blog/2026-08-11/hero-v2.avif
 heroAlt: "ガレージキット兎野未桃"
